@@ -1,18 +1,17 @@
 custom_rules:
-  - build-configs/state_focused/state_focused_sampling.smk
-tiers:
-    division: "California"
-    contextual: "global"
+  - build-configs/state_focused/state_focused_sampling_genomic.smk,
+  - build-configs/state_focused/state_focused_sampling_N450.smk
 filter:
+    division: "Washington"
     group_by_state: "division year"
-    group_by_contextual: "country year"
+    group_by_continental: "country year"
     sequences_per_group_state: 20
-    sequences_per_group_contextual: 20
+    sequences_per_group_continental: 20
     min_date: 1950
     min_length: 5000
 filter_N450:
     group_by_state: "division year"
-    group_by_contextual: "country year"
+    group_by_continental: "country year"
     sequences_per_group_state: 20
     sequences_per_group_contextual: 2
     min_date: 1950
