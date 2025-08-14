@@ -1,5 +1,3 @@
-
-# Define global parameters
 STRAIN_ID = config["strain_id_field"]
 
 """
@@ -36,7 +34,7 @@ rule filter_genomic_state:
             --metadata-id-columns {params.strain_id} \
             --query "division == '{params.division}'" \
             --exclude {input.exclude} \
-            --output-strains results/genome/{params.division}_filtered.txt \
+            --output-strains {output.strains} \
             --group-by {params.group_by} \
             --sequences-per-group {params.sequences_per_group} \
             --min-date {params.min_date} \
@@ -79,20 +77,23 @@ rule filter_genomic_continental:
         """
 
 rule combine_sequences_genomic:
-"""
-
-"""
+    """
+    Combining filtered sequences from
+      - {params.division}
+      - continental (USA and Canada)
+      - sequences specified in {include_files}
+    """
     input:
+        strains_state = "results/genome/{params.division}_filtered.txt",
+        strains_continental = "results/genome/continental_filtered.txt",
         sequences="data/sequences.fasta",
         metadata="data/metadata.tsv",
-        include = resolve_config_path(config["files"]["include"])({"gene": "genome"}),
+        include_files = resolve_config_path(config["files"]["include"])({"gene": "genome"}),
     output:
         sequences="results/genome/filtered.fasta"
     params:
         strain_id=STRAIN_ID,
-        division=config["filter"]["division"],
-        min_date=config["filter"]["min_date"],
-        min_length=config["filter"]["min_length"]
+        division=config["filter"]["division"]
     shell:
         """
         augur filter \
@@ -100,9 +101,9 @@ rule combine_sequences_genomic:
         --metadata-id-columns {params.strain_id} \
         --metadata {input.metadata} \
         --exclude-all \
-        --include results/genome/{params.division}_filtered.txt \
-            results/genome/continental_filtered.txt \
-            {input.include} \
+        --include {input.strains_state} \
+                 {input.strains_continental} \
+                 {input.include_files} \
         --output-sequences {output.sequences} \
         """
 
@@ -121,11 +122,11 @@ rule filter_N450_state:
 
     """
     input:
-        sequences="data/sequences.fasta",
+        sequences="results/N450/sequences.fasta",
         metadata="data/metadata.tsv",
         exclude=resolve_config_path(config["files"]["exclude"]),
     output:
-        strains="results/genome/{params.division}_filtered.txt"
+        strains="results/N450/{params.division}_filtered.txt"
     params:
         strain_id=STRAIN_ID,
         division=config["filter"]["division"],
@@ -157,11 +158,11 @@ rule filter_N450_continental:
       - minimum genome length of {params.min_length}
     """
     input:
-        sequences="data/sequences.fasta",
+        sequences="results/N450/sequences.fasta",
         metadata="data/metadata.tsv",
         exclude=resolve_config_path(config["files"]["exclude"])
     output:
-        strains="results/genome/continental_filtered.txt",
+        strains="results/N450/continental_filtered.txt",
     params:
         strain_id=STRAIN_ID,
         group_by=config["filter_N450"]["group_by_continental"],
@@ -183,21 +184,24 @@ rule filter_N450_continental:
             --min-length {params.min_length}
         """
 
-rule combine_sequences_N450:
-"""
-
-"""
+rule combine_sequences_N450_N450:
+    """
+    combining filtered sequences from
+      - {params.division}
+      - continental (USA and Canada)
+      - sequences specified in include_files
+    """
     input:
-        sequences="data/sequences.fasta",
-        metadata="data/metadata.tsv",
-        include=resolve_config_path(config["files"]["include"])({"gene": "N450"}),
+        strains_state = "results/N450/{params.division}_filtered.txt",
+        strains_continental = "results/N450/continental_filtered.txt",
+        sequences = "results/N450/sequences.fasta",
+        metadata = "data/metadata.tsv",
+        include_files=resolve_config_path(config["files"]["include"])({"gene": "N450"}),
     output:
         sequences="results/N450/aligned.fasta"
     params:
         strain_id=STRAIN_ID,
-        division=config["filter"]["division"],
-        min_date=config["filter_N450"]["min_date"],
-        min_length=config["filter_N450"]["min_length"]
+        division=config["filter"]["division"]
     shell:
         """
         augur filter \
@@ -205,10 +209,8 @@ rule combine_sequences_N450:
         --metadata-id-columns {params.strain_id} \
         --metadata {input.metadata} \
         --exclude-all \
-        --include results/N450/{params.division}_filtered.txt \
-            results/N450/continental_filtered.txt \
+        --include {input.strains_state} \
+            {input.strains_continental} \
+            {input.include_files} \
         --output-sequences {output.sequences} \
         """
-
-ruleorder: filter_genomic_state > filter_genomic_continental > combine_sequences_genomic
-ruleorder: filter_N450_state > filter_N450_continental > combine_sequences_N450

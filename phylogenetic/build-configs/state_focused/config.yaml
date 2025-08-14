@@ -12,6 +12,6 @@ filter_N450:
     group_by_state: "division year"
     group_by_continental: "country year"
     sequences_per_group_state: 20
-    sequences_per_group_contextual: 2
+    sequences_per_group_continental: 2
     min_date: 1950
     min_length: 400
