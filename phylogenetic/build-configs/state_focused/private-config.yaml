@@ -29,7 +29,7 @@ custom_subsample:
                     - defaults/dropped_strains.txt
             global:
                 query: region != "North America"
-                max_sequences: 3000
+                max_sequences: 1500
                 min_length: 1300
                 min_date: "1950"
                 include:
