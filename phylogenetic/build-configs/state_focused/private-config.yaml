@@ -36,3 +36,6 @@ custom_subsample:
                     - defaults/include_strains_genome.txt
                 exclude:
                     - defaults/dropped_strains.txt
+refine:
+    genome:
+        divergence_units: "mutations"
