@@ -1,41 +1,84 @@
+builds:
+  - genome/global
+  - genome/north-america
 additional_inputs:
-  - name: private
-    metadata: ../placement/sidecar.tsv
-    sequences: ../placement/private_sequences.fasta
   - name: ppx_restricted
     metadata: "s3://nextstrain-data/files/workflows/measles/metadata_restricted.tsv.zst"
     sequences: "s3://nextstrain-data/files/workflows/measles/sequences_restricted.fasta.zst"
-
-builds: 
-  - genome
+  - name: private
+    metadata: ../placement/private_metadata.tsv
+    sequences: ../placement/private_sequences.fasta
+files:
+    auspice_config: 'build-configs/state_focused/{build}.json'
 custom_subsample:
-    genome:
+    genome/global:
         defaults:
             exclude_ambiguous_dates_by: year
         samples:
             state:
                 query: division == "Washington"
                 max_sequences: 3000
-                min_length: 1300
+                min_length: 13000
+                min_date: "1950"
+                exclude:
+                    - defaults/dropped_strains.txt
+            continental:
+                query: division != "Washington" & region == "North America"
+                max_sequences: 1500
+                min_length: 13000
+                min_date: "1950"
+                exclude:
+                    - defaults/dropped_strains.txt
+            global:
+                query: region != "North America"
+                max_sequences: 3000
+                min_length: 13000
+                min_date: "1950"
+                include:
+                    - defaults/include_strains_genome.txt
+                exclude:
+                    - defaults/dropped_strains.txt
+    genome/north-america:
+        defaults:
+            exclude_ambiguous_dates_by: year
+        samples:
+            state:
+                query: division == "Washington"
+                max_sequences: 3000
+                min_length: 13000
                 min_date: "1950"
                 exclude:
                     - defaults/dropped_strains.txt
             continental:
                 query: division != "Washington" & region == "North America"
                 max_sequences: 3000
-                min_length: 1300
+                min_length: 13000
                 min_date: "1950"
                 exclude:
                     - defaults/dropped_strains.txt
             global:
                 query: region != "North America"
                 max_sequences: 1500
-                min_length: 1300
+                min_length: 13000
                 min_date: "1950"
                 include:
                     - defaults/include_strains_genome.txt
                 exclude:
                     - defaults/dropped_strains.txt
 refine:
-    genome:
-        divergence_units: "mutations"
+    genome/global: >-
+        --timetree
+        --coalescent opt
+        --date-inference marginal
+        --date-confidence
+        --clock-filter-iqd 99
+        --stochastic-resolve
+        --divergence-units mutations
+    genome/north-america: >-
+        --timetree
+        --coalescent opt
+        --date-inference marginal
+        --date-confidence
+        --clock-filter-iqd 99
+        --stochastic-resolve
+        --divergence-units mutations
