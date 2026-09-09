@@ -71,7 +71,7 @@ refine:
         --coalescent opt
         --date-inference marginal
         --date-confidence
-        --clock-filter-iqd 99
+        --clock-filter-iqd 8
         --stochastic-resolve
         --divergence-units mutations
     genome/north-america: >-
@@ -79,6 +79,6 @@ refine:
         --coalescent opt
         --date-inference marginal
         --date-confidence
-        --clock-filter-iqd 99
+        --clock-filter-iqd 8
         --stochastic-resolve
         --divergence-units mutations
